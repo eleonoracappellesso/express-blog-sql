@@ -30,11 +30,24 @@ function show(req, res) {
                 error: 'Nessun post trovato'
             });
         }
-        res.json({
-            success: true,
-            item
+        // console.log("ID ricevuto per i tag:", id);
+
+        const sqlTags =
+            `SELECT tags.id, tags.label FROM tags
+            JOIN post_tag ON post_tag.tag_id = tags.id
+            WHERE post_tag.post_id = ?`;
+        connection.query(sqlTags, [id], (err, results) => {
+            console.log(results);
+            if (err) return res.status(500).json({
+                error: 'DB query failed'
+            });
+            item.tags = results;
+            res.json({
+                success: true,
+                item
+            });
         });
-    })
+    });
 }
 
 function store(req, res) {
@@ -87,7 +100,7 @@ function update(req, res) {
 function destroy(req, res) {
     const id = parseInt(req.params.id);
     const index = posts.findIndex((item) => item.id === id);
-    const sql = 'DELETE * FROM `posts` WHERE `id` = ?';
+    const sql = 'DELETE FROM `posts` WHERE `id` = ?';
     connection.query(sql, [id], (err, results) => {
         if (err) return res.status(500).json({
             error: 'DB query failed'
