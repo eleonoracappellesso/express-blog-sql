@@ -16,21 +16,25 @@ function index(req, res) {
 }
 
 function show(req, res) {
-    console.log(req.params);
-    const postId = parseInt(req.params.id);
-    const item = allPosts.posts.find((item) => item.id === postId);
-    if (item) {
+    const id = parseInt(req.params.id);
+    const sql = 'SELECT * FROM `posts` WHERE `id` = ?';
+
+
+    connection.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json({
+            error: 'DB query failed'
+        });
+        const item = results[0];
+        if (!item) {
+            return res.status(404).json({
+                error: 'Nessun post trovato'
+            });
+        }
         res.json({
             success: true,
-            item,
+            item
         });
-    } else {
-        res.status(404);
-        res.json({
-            success: false,
-            message: `Il post con l'id ${postId} è inesistente`,
-        });
-    }
+    })
 }
 
 function store(req, res) {
