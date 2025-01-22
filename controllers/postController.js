@@ -82,18 +82,14 @@ function update(req, res) {
 
 function destroy(req, res) {
     const id = parseInt(req.params.id);
-    const index = allPosts.posts.findIndex((item) => item.id === id);
-    if (index !== -1) {
-        allPosts.posts.splice(index, 1);
-        console.log(allPosts);
-        res.sendStatus(204);
-    } else {
-        res.status(404);
-        res.json({
-            error: "404",
-            message: "Post non trovato",
+    const index = posts.findIndex((item) => item.id === id);
+    const sql = 'DELETE * FROM `posts` WHERE `id` = ?';
+    connection.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json({
+            error: 'DB query failed'
         });
-    }
+        res.sendStatus(204);
+    })
 }
 
 module.exports = { index, show, store, update, destroy };
