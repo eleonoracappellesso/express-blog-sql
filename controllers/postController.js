@@ -1,30 +1,18 @@
-const allPosts = require("../models/post.js");
+const connection = require("../connection.js");
 
 function index(req, res) {
-    // dalla query string prendo il tag da filtrare
-    const tagName = req.query.tags;
-    // inizializzo postList con tutti i post
-    let postList = [...allPosts.posts]; // {posts, tag}
+    const sql = 'SELECT * FROM `posts`'
+    connection.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database query failed' });
+        console.log(results);
+        let data = results;
+        const response = {
+            totalCount: results.length,
+            data,
+        };
+        res.json(response);
 
-    // se è stato specificato un tag, filtro i post in base a quel tag
-    if (tagName) {
-        postList = allPosts.filter((post) => {
-            // filtro i post in base ai tag specificati
-            return post.tags.includes(tagName.toLowerCase());
-        });
-        // se non ci sono post con il tag specificato restituisce un errore
-        if (postList.length === 0) {
-            postList = { Errore: `Nessun post contiene il tag ${(req.query.tags).toUpperCase()}` };
-        }
-    }
-
-
-    // restituisco un oggetto json con i post filtrati e il conteggio dei post
-    res.json({
-        posts: postList,
-        count: postList.length
-    }
-    );
+    });
 }
 
 function show(req, res) {
